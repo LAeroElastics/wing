@@ -108,30 +108,48 @@ class WingSection(object):
 
         offset = -(leading_edge[:,1]-leading_edge[-1,1])*tan_theta
 
-        for i_chord_iter in range(num_chord_max_iter):
+        for i_chord_iter in range(num_chord_max_iter*2):
             self.airfoil[i_chord_iter,:,0]+=offset
 
+        for i_chord_iter in range(num_chord_max_iter):
+            self.camber[i_chord_iter,:,0]+=offset
+
     def set_dihedral_angle(self, dihedral):
-        num_chord_max_iter = numpy.shape(self.airfoil)[0]
-        num_span_max_iter = numpy.shape(self.airfoil)[1]
+        num_chord_max_iter = self.num_chord_max_iter
+        num_span_max_iter = self.num_span_max_iter
 
         leading_edge = self.airfoil[0]
         tan_theta = numpy.tan(DBL_D2R*dihedral)
 
         offset = -(leading_edge[:,1]-leading_edge[-1,1])*tan_theta
 
-        for i_chord_iter in range(num_chord_max_iter):
-            self.airfoil[i_chord_iter,:,0]+=offset
+        for i_chord_iter in range(num_chord_max_iter*2):
+            self.airfoil[i_chord_iter,:,2]+=offset
 
-    def set_taper_ratio(self):
-        num_chord_max_iter = numpy.shape(self.airfoil)[0]
-        num_span_max_iter = numpy.shape(self.airfoil)[1]
+        for i_chord_iter in range(num_chord_max_iter):
+            self.camber[i_chord_iter, :, 2]+=offset
+
+    def set_taper_ratio(self,taper_ratio):
+        num_chord_max_iter = self.num_chord_max_iter
+        num_span_max_iter = self.num_span_max_iter
 
         trailing_edge = self.airfoil[-1]
         leading_edge = self.airfoil[0]
         quater_chord = 0.25*trailing_edge+0.75*leading_edge
+        x = quater_chord[:,1]
 
+        span = x[-1] - x[0]
+        taper_steps = numpy.interp(x.real, numpy.array([0.0,span]).real,numpy.array([taper_ratio,1.0]).real)
 
+        for i_chord_iter in range(num_chord_max_iter*2):
+            for i_z in range(3):
+                self.airfoil[i_chord_iter,:,i_z] = (self.airfoil[i_chord_iter,:,i_z]-quater_chord[:,i_z])*\
+                                                   taper_steps+quater_chord[:,i_z]
+        #todo 外形以外のテーパ
+        for i_chord_iter in range(num_chord_max_iter):
+            for i_z in range(3):
+                self.camber[i_chord_iter,:,i_z] = (self.camber[i_chord_iter,:,i_z]-quater_chord[:,i_z])*\
+                                                  taper_steps+quater_chord[:,i_z]
 
     def set_chord_scale(self, dst):
         trailing_edge = self.airfoil[-1]
@@ -140,9 +158,14 @@ class WingSection(object):
 
         num_span_max_iter = numpy.shape(self.airfoil)[1]
 
-        for i_span_iter in range(num_span_max_iter):
+        for i_span_iter in range(num_span_max_iter*2):
             self.airfoil[:,i_span_iter,0] \
                 = (self.airfoil[:,i_span_iter,0]-quater_chord[i_span_iter,0]
+                   *dst[i_span_iter]+quater_chord[i_span_iter,0])
+
+        for i_span_iter in range(num_span_max_iter):
+            self.camber[:,i_span_iter,0] \
+                = (self.camber[:,i_span_iter,0]-quater_chord[i_span_iter,0]
                    *dst[i_span_iter]+quater_chord[i_span_iter,0])
 
     def set_span_scale(self, dst):
@@ -154,4 +177,4 @@ class WingSection(object):
         fixed_span = quater_chord[:,1]/temp
 
         self.airfoil[:,:,1] = fixed_span*dst
-
+        self.camber[:,:,1] = fixed_span*dst

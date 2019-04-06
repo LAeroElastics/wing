@@ -20,23 +20,23 @@ def problem():
     max_camber = 0.02
     location_max_camber = 0.4
     thickness = 0.12
-    vinf = 0.3
-    alpha = 1.0
+    mach = 0.1
+    alpha = 5.0
 
-    sweep_angle = 20.0*DBL_D2R
-    dihedral_angle = 3.0*DBL_D2R
+    sweep_angle = 20.0
+    dihedral_angle = -5.0
     taper_ratio = 0.5
 
     v0 = 340.294
-    vinf = v0*vinf
+    vinf = v0*mach
     wingsection = vpm_airfoil.WingSection(num_x,num_y,span,chord,max_camber,location_max_camber,thickness)
     wingsection.assemble()
     wingsection.set_sweep_angle(sweep_angle)
     wingsection.set_dihedral_angle(dihedral_angle)
+    wingsection.set_taper_ratio(taper_ratio)
 
     mesh_airfoil = wingsection.airfoil
     mesh_camber = wingsection.camber
-    print(mesh_airfoil)
     aerodynamics = vpm_aerodynamics.Aerodynamics(mesh_airfoil,mesh_camber)
     matrix_part, matrix_aic, boundary_pts, collocation_pts = aerodynamics.gen_aic_matrix(alpha, num_x, num_y)
     matrix_rhs = aerodynamics.gen_rhs_vector(alpha, vinf)
@@ -47,7 +47,7 @@ def problem():
 
 def main():
     force, airfoil, boundary_pts, collocation_pts = problem()
-    #cmn_plot.show_alt(airfoil,collocation_pts,boundary_pts,force)
+    print(force)
     cmn_plot.show(airfoil,boundary_pts,collocation_pts,force)
     cmn_plot.show2d(airfoil,collocation_pts)
 if __name__ == "__main__":

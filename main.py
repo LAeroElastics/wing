@@ -20,10 +20,10 @@ def problem():
     max_camber = 0.02
     location_max_camber = 0.4
     thickness = 0.12
-    mach = 0.1
-    alpha = 5.0
+    mach = 0.15
+    alpha = 3.0
 
-    sweep_angle = 20.0
+    sweep_angle = 10.0
     dihedral_angle = -5.0
     taper_ratio = 0.5
 
@@ -47,8 +47,8 @@ def problem():
 
 def main():
     force, airfoil, boundary_pts, collocation_pts = problem()
-    print(force)
     cmn_plot.show(airfoil,boundary_pts,collocation_pts,force)
     cmn_plot.show2d(airfoil,collocation_pts)
+    cmn_plot.show_contour(airfoil,boundary_pts,collocation_pts,force)
 if __name__ == "__main__":
     main()

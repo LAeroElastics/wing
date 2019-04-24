@@ -21,7 +21,7 @@ def sin(arg):
 
 def calc_forces(nx, ny, partial_matrix, gamma_matrix, boundary_pts, alpha, v):
     sina = sin(alpha)  # radian
-    cosa = sin(alpha)
+    cosa = cos(alpha)
 
     rho = 1.2
 
@@ -34,7 +34,7 @@ def calc_forces(nx, ny, partial_matrix, gamma_matrix, boundary_pts, alpha, v):
     vinf[:, 0] += cosa * v
     vinf[:, 2] += sina * v
 
-    boundary_vector = boundary_pts[:, 1:, :] - boundary_pts[:, :-1, :]
+    boundary_vector = -boundary_pts[:, 1:, :] + boundary_pts[:, :-1, :]
     cross_vector = numpy.cross(vinf, boundary_vector.reshape(-1, boundary_vector.shape[-1], order="F"))
 
     forces = numpy.zeros((panels, 3), dtype=float)
